@@ -96,8 +96,8 @@ class grafana (
   class { 'grafana::config': } ~>
   class { 'grafana::service': }
 
-  contain 'grafana::install'
-  contain 'grafana::service'
-
+  #contain 'grafana::install'
+  #contain 'grafana::service'
+  anchor { 'grafana_first': } -> Class['grafana::install'] -> Class['grafana::service'] -> anchor { 'grafana_last': }
   #Class['grafana']
 }
