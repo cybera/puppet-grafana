@@ -5,7 +5,7 @@ class grafana::install {
     $real_archive_source = $::grafana::archive_source
   }
   else {
-    $real_archive_source = "https://grafanarel.s3.amazonaws.com/builds/grafana-${::grafana::version}.linux-x64.tar.gz"
+    $real_archive_source = "https://dl.grafana.com/oss/release/grafana_${::grafana::version}.linux-amd64.tar.gz"
   }
 
   if $::grafana::package_source != undef {
@@ -13,12 +13,12 @@ class grafana::install {
   }
   else {
     $real_package_source = $::osfamily ? {
-      /(RedHat|Amazon)/ => "https://grafanarel.s3.amazonaws.com/builds/grafana-${::grafana::version}-${::grafana::rpm_iteration}.x86_64.rpm",
-      'Debian'          => "https://grafanarel.s3.amazonaws.com/builds/grafana_${::grafana::version}_amd64.deb",
+      /(RedHat|Amazon)/ => "https://dl.grafana.com/oss/release/grafana-${::grafana::version}-${::grafana::rpm_iteration}.x86_64.rpm",
+      'Debian'          => "https://dl.grafana.com/oss/release/grafana_${::grafana::version}_amd64.deb",
       default           => $real_archive_source,
     }
   }
-  
+
   case $::grafana::install_method {
     'docker': {
       docker::image { 'grafana/grafana':
@@ -74,12 +74,12 @@ class grafana::install {
               class { 'apt': }
             }
             apt::source { 'grafana':
-              location => "https://packagecloud.io/grafana/${::grafana::repo_name}/debian",
-              release  => 'wheezy',
+              location => "https://packages.grafana.com/oss/deb",
+              release  => "${::grafana::repo_name}",
               repos    => 'main',
-              key      =>  {
-                'id'     => '418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB',
-                'source' => 'https://packagecloud.io/gpg.key'
+              key      => {
+                'id'     => '4E40DDF6D76E284A4A6780E48C8C34C524098CB6',
+                'source' => 'https://packages.grafana.com/gpg.key'
               },
               before   => Package[$::grafana::package_name],
             }
@@ -99,9 +99,9 @@ class grafana::install {
           if ( $::grafana::manage_package_repo ){
             yumrepo { 'grafana':
               descr    => 'grafana repo',
-              baseurl  => 'https://packagecloud.io/grafana/stable/el/6/$basearch',
+              baseurl  => 'https://packages.grafana.com/oss/rpm',
               gpgcheck => 1,
-              gpgkey   => 'https://packagecloud.io/gpg.key https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana',
+              gpgkey   => 'https://packages.grafana.com/gpg.key',
               enabled  => 1,
               before   => Package[$::grafana::package_name],
             }
